@@ -1,16 +1,45 @@
 import * as React from 'react'
 
-const { createContext, useState, useContext } = React
+const { createContext, useState, useContext, useMemo, useEffect } = React
 
 const appContext = createContext<any>(null)
 
-export const App = () => {
-  const [appState, setAppState] = useState({
+const connect = (Component: ({ dispatch, state }: any) => JSX.Element) => {
+  console.log('connect render')
+  return (props: any) => {
+    const { state, setState } = useContext(appContext)
+    const [, update] = useState({})
+    useEffect(() => {
+      store.subscribe(() => update({}))
+    }, [])
+    const dispatch = (action: any) => {
+      setState(reducer(state, action))
+    }
+    return <Component {...props} dispatch={dispatch} state={state} />
+  }
+}
+
+const store = {
+  state: {
     user: { name: 'ChenNan', age: 22 }
-  })
-  const contextValue = { appState, setAppState }
+  },
+  setState(newState: any) {
+    store.state = newState
+    store.listeners.map(fn => fn(store.state))
+  },
+  listeners: [] as Array<(state?: unknown) => void>,
+  subscribe(fn: () => void) {
+    store.listeners.push(fn)
+    return () => {
+      const index = store.listeners.indexOf(fn)
+      store.listeners.splice(index, 1)
+    }
+  }
+}
+
+export const App = () => {
   return (
-    <appContext.Provider value={contextValue}>
+    <appContext.Provider value={store}>
       <ComponentOne />
       <ComponentTwo />
       <ComponentThree />
@@ -18,14 +47,33 @@ export const App = () => {
   )
 }
 
-const ComponentOne = () => <section>组件1<User /></section>
-const ComponentTwo = () => <section>组件2<UserModifier /></section>
-const ComponentThree = () => <section>组件3</section>
-
-const User = () => {
-  const contextValue = useContext(appContext)
-  return <div>UserName: {contextValue.appState.user.name}</div>
+const ComponentOne = () => {
+  console.log('ComponentOne render')
+  return (
+    <section>
+      组件1
+      <User />
+    </section>
+  )
 }
+const ComponentTwo = () => {
+  console.log('ComponentTwo render')
+  return (
+    <section>
+      组件2
+      <UserModifier />
+    </section>
+  )
+}
+const ComponentThree = () => {
+  console.log('ComponentThree render')
+  return <section>组件3</section>
+}
+
+const User = connect(({ state, dispatch }) => {
+  console.log('User render')
+  return <div>UserName: {state.user.name}</div>
+})
 
 const reducer = (state: any, { type, payload }: any) => {
   if (type === 'updateUser') {
@@ -41,17 +89,8 @@ const reducer = (state: any, { type, payload }: any) => {
   }
 }
 
-const connect = (Component: ({ dispatch, state }: any) => JSX.Element) => {
-  return (props: any) => {
-    const { appState, setAppState } = useContext(appContext)
-    const dispatch = (action: any) => {
-      setAppState(reducer(appState, action))
-    }
-    return <Component {...props} dispatch={dispatch} state={appState} />
-  }
-}
-
 const UserModifier = connect(({ dispatch, state, children }: any) => {
+  console.log('UserModifier render')
   const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     dispatch({ type: 'updateUser', payload: { name: e.target.value } })
   }
