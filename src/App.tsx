@@ -2,7 +2,7 @@ import * as React from 'react'
 
 const { createContext, useState, useContext } = React
 
-const appContext = createContext(null)
+const appContext = createContext<any>(null)
 
 export const App = () => {
   const [appState, setAppState] = useState({
@@ -41,7 +41,7 @@ const User = () => {
 
 const UserModifier = () => {
   const { appState, setAppState } = useContext(appContext)
-  const onChange = e => {
+  const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     appState.user.name = e.target.value
     setAppState({ ...appState })
   }
