@@ -1,10 +1,8 @@
 import * as React from 'react'
 
-type A = any
-
 const { createContext, useState, useContext, useEffect } = React
 
-export const appContext = createContext<A>(null)
+export const appContext = createContext<any>(null)
 
 export const store = {
   state: {
@@ -24,7 +22,7 @@ export const store = {
   }
 }
 
-const reducer = (state: A, { type, payload }: A) => {
+const reducer = (state: any, { type, payload }: any) => {
   if (type === 'updateUser') {
     return {
       ...state,
@@ -38,7 +36,7 @@ const reducer = (state: A, { type, payload }: A) => {
   }
 }
 
-export const connect = (Component: ({ dispatch, state }: A) => JSX.Element) => {
+export const connect = (Component: ({ dispatch, state }: any) => JSX.Element) => {
   console.log('connect render')
   return (props: any) => {
     const { state, setState } = useContext(appContext)
