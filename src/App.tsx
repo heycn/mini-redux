@@ -19,7 +19,7 @@ export const App = () => {
 }
 
 const ComponentOne = () => <section>组件1<User /></section>
-const ComponentTwo = () => <section>组件2<UserModifier /></section>
+const ComponentTwo = () => <section>组件2<Wrapper /></section>
 const ComponentThree = () => <section>组件3</section>
 
 const User = () => {
@@ -41,16 +41,24 @@ const reducer = (state: any, { type, payload }: any) => {
   }
 }
 
-const UserModifier = () => {
+const Wrapper = () => {
   const { appState, setAppState } = useContext(appContext)
+  const dispatch = (action: any) => {
+    setAppState(reducer(appState, action))
+  }
+
+  return <UserModifier dispatch={dispatch} state={appState} />
+}
+
+const UserModifier = ({ dispatch, state }: any) => {
   const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setAppState(reducer(appState, { type: 'updateUser', payload: { name: e.target.value } }))
+    dispatch({ type: 'updateUser', payload: { name: e.target.value } })
   }
 
   return (
     <div>
       <input
-        value={appState.user.name}
+        value={state.user.name}
         onChange={onChange}
       />
     </div>
