@@ -1,34 +1,57 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import './App.css'
+import * as React from 'react'
 
-function App() {
-  const [count, setCount] = useState(0)
+const { createContext, useState, useContext } = React
 
+const appContext = createContext(null)
+
+export const App = () => {
+  const [appState, setAppState] = useState({
+    user: { name: 'ChenNan', age: 22 }
+  })
+  const contextValue = { appState, setAppState }
   return (
-    <div className="App">
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src="/vite.svg" className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://reactjs.org" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </div>
+    <appContext.Provider value={contextValue}>
+      <ComponentOne />
+      <ComponentTwo />
+      <ComponentThree />
+    </appContext.Provider>
   )
 }
 
-export default App
+const ComponentOne = () => (
+  <section>
+    组件1
+    <User />
+  </section>
+)
+
+const ComponentTwo = () => (
+  <section>
+    组件2
+    <UserModifier />
+  </section>
+)
+
+const ComponentThree = () => <section>组件3</section>
+
+const User = () => {
+  const contextValue = useContext(appContext)
+  return <div>UserName: {contextValue.appState.user.name}</div>
+}
+
+const UserModifier = () => {
+  const { appState, setAppState } = useContext(appContext)
+  const onChange = e => {
+    appState.user.name = e.target.value
+    setAppState({ ...appState })
+  }
+
+  return (
+    <div>
+      <input
+        value={appState.user.name}
+        onChange={onChange}
+      />
+    </div>
+  )
+}
