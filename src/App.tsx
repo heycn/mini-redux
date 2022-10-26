@@ -18,20 +18,8 @@ export const App = () => {
   )
 }
 
-const ComponentOne = () => (
-  <section>
-    组件1
-    <User />
-  </section>
-)
-
-const ComponentTwo = () => (
-  <section>
-    组件2
-    <UserModifier />
-  </section>
-)
-
+const ComponentOne = () => <section>组件1<User /></section>
+const ComponentTwo = () => <section>组件2<UserModifier /></section>
 const ComponentThree = () => <section>组件3</section>
 
 const User = () => {
@@ -39,11 +27,24 @@ const User = () => {
   return <div>UserName: {contextValue.appState.user.name}</div>
 }
 
+const reducer = (state: any, { type, payload }: any) => {
+  if (type === 'updateUser') {
+    return {
+      ...state,
+      user: {
+        ...state.user,
+        ...payload
+      }
+    }
+  } else {
+    return state
+  }
+}
+
 const UserModifier = () => {
   const { appState, setAppState } = useContext(appContext)
   const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    appState.user.name = e.target.value
-    setAppState({ ...appState })
+    setAppState(reducer(appState, { type: 'updateUser', payload: { name: e.target.value } }))
   }
 
   return (
