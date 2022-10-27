@@ -36,17 +36,18 @@ const reducer = (state: any, { type, payload }: any) => {
   }
 }
 
-export const connect = (Component: ({ dispatch, state }: any) => JSX.Element) => {
-  console.log('connect render')
-  return (props: any) => {
-    const { state, setState } = useContext(appContext)
-    const [, update] = useState({})
-    useEffect(() => {
-      store.subscribe(() => update({}))
-    }, [])
-    const dispatch = (action: any) => {
-      setState(reducer(state, action))
+export const connect: (fn1Arg?: any) => (fn2Arg?: any) => React.FC =
+  (selector: any) => (Component: ({ dispatch, state }: any) => JSX.Element) => {
+    return (props: any) => {
+      const { state, setState } = useContext(appContext)
+      const [, update] = useState({})
+      const data = selector ? selector(state) : { state }
+      useEffect(() => {
+        store.subscribe(() => update({}))
+      }, [])
+      const dispatch = (action: any) => {
+        setState(reducer(state, action))
+      }
+      return <Component {...props} {...data} dispatch={dispatch} />
     }
-    return <Component {...props} dispatch={dispatch} state={state} />
   }
-}
