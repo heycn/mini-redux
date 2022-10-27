@@ -47,12 +47,14 @@ const changed = (oldState: any, newState: any) => {
   return changed
 }
 
-export const connect: (fn1Arg?: any) => (fn2Arg?: any) => React.FC =
-  (selector: any) => (Component: ({ dispatch, state }: any) => JSX.Element) => {
+export const connect: (selector?: any, dispatchSelector?: any) => (fn2Arg?: any) => React.FC =
+  (selector: any, dispatchSelector: any) => (Component: ({ dispatch, state }: any) => JSX.Element) => {
     return (props: any) => {
+      const dispatch = (action: string) => setState(reducer(state, action))
       const { state, setState } = useContext(appContext)
       const [, update] = useState({})
       const data = selector ? selector(state) : { state }
+      const dispatchers = dispatchSelector ? dispatchSelector(dispatch) : { setState }
       useEffect(() => store.subscribe(() => {
         const newData = selector ? selector(store.state) : { state: store.state }
         if (changed(data, newData)) {
@@ -60,9 +62,6 @@ export const connect: (fn1Arg?: any) => (fn2Arg?: any) => React.FC =
           update({})
         }
       }), [selector])
-      const dispatch = (action: string) => {
-        setState(reducer(state, action))
-      }
-      return <Component {...props} {...data} dispatch={dispatch} />
+      return <Component {...props} {...data} {...dispatchers} />
     }
   }

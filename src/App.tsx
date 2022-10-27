@@ -37,9 +37,13 @@ const User: any = connect((state: any) => {
   return <div>UserName: {user.name}</div>
 })
 
-const UserModifier = connect()(({ dispatch, state, children }: any) => {
+const UserModifier = connect(null, (dispatch: any) => {
+  return {
+    updateUser: (attrs: any) => dispatch({ type: 'updateUser', payload: attrs })
+  }
+})(({ updateUser, state, children }: any) => {
   const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    dispatch({ type: 'updateUser', payload: { name: e.target.value } })
+    updateUser({ name: e.target.value })
   }
 
   return (
