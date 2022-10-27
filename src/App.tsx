@@ -19,9 +19,17 @@ const ComponentTwo = () => {
   )
 }
 
-const ComponentThree = () => {
-  return <section>组件3</section>
-}
+const ComponentThree = connect((state: any) => {
+  return { group: state.group }
+})(({ group }: any) => {
+  console.log('组件3重新渲染')
+  return (
+    <section>
+      组件3
+      <div>Group: {group.name} </div>
+    </section>
+  )
+})
 
 const User: any = connect((state: any) => {
   return { user: state.user }
