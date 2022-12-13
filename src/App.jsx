@@ -1,17 +1,45 @@
 import * as React from 'react'
-const { useState, useContext } = React
+const { useState, useEffect, useContext } = React
 
 const appContext = React.createContext(null)
 
-export const App = () => {
-  const [appState, setAppState] = useState({
+const connect = Component => {
+  return props => {
+    const { state, setState } = useContext(appContext)
+    const [_, forceUpdate] = useState({})
+    useEffect(() => {
+      store.subscribe(() => {
+        forceUpdate({})
+      })
+    }, [])
+    const dispatch = action => {
+      setState(reducer(state, action))
+    }
+    return <Component {...props} dispatch={dispatch} state={state} />
+  }
+}
+
+const store = {
+  state: {
     user: { name: 'heycn', age: 22 }
-  })
+  },
+  setState(newState) {
+    store.state = newState
+    store.listeners.map(fn => fn(store.state))
+  },
+  listeners: [],
+  subscribe(fn) {
+    store.listeners.push(fn)
+    return () => {
+      const index = store.listeners.indexOf(fn)
+      store.listeners.splice(index, 1)
+    }
+  }
+}
 
-  const contextValue = { appState, setAppState }
-
+export const App = () => {
   return (
-    <appContext.Provider value={contextValue}>
+    <appContext.Provider value={store}>
       <Brother />
       <Sister />
       <Cousin />
@@ -20,27 +48,36 @@ export const App = () => {
 }
 
 // Brother 用于展示 User 数据
-const Brother = () => (
-  <section>
-    Brother
-    <User />
-  </section>
-)
+const Brother = () => {
+  console.log('Brother render!')
+  return (
+    <section>
+      Brother
+      <User />
+    </section>
+  )
+}
 
 // Sister 用于修改 User 数据
-const Sister = () => (
-  <section>
-    Sister
-    <UserModifier />
-  </section>
-)
-
-const Cousin = () => <section>Cousin</section>
-
-const User = () => {
-  const contextValue = useContext(appContext)
-  return <div>UserName:{contextValue.appState.user.name}</div>
+const Sister = () => {
+  console.log('Sister render!')
+  return (
+    <section>
+      Sister
+      <UserModifier />
+    </section>
+  )
 }
+
+const Cousin = () => {
+  console.log('Cousin render!')
+  return <section>Cousin</section>
+}
+
+const User = connect(({ state, dispatch }) => {
+  console.log('User render!')
+  return <div>UserName:{state.user.name}</div>
+})
 
 const reducer = (state, { type, payload }) => {
   if (type === 'updateUser') {
@@ -56,26 +93,16 @@ const reducer = (state, { type, payload }) => {
   }
 }
 
-const connect = Component => {
-  return props => {
-    const { appState, setAppState } = useContext(appContext)
-    const dispatch = action => {
-      setAppState(reducer(appState, action))
-    }
-    return <Component {...props} dispatch={dispatch} state={appState} />
-  }
-}
-
-const UserModifier = connect(({ dispatch, state, children }) => {
+const UserModifier = connect(({ dispatch, state }) => {
   const onChange = e => {
     dispatch({
       type: 'updateUser',
       payload: { name: e.target.value }
     })
   }
+  console.log('UserModifier render!')
   return (
     <div>
-      {children}
       <input value={state.user.name} onChange={onChange} />
     </div>
   )
