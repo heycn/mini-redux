@@ -32,10 +32,11 @@ const reducer = (state, { type, payload }) => {
   }
 }
 
-export const connect = Component => {
+export const connect = selector => Component => {
   return props => {
     const { state, setState } = useContext(appContext)
     const [_, forceUpdate] = useState({})
+    const selectedState = selector ? selector(state) : { state }
     useEffect(() => {
       store.subscribe(() => {
         forceUpdate({})
@@ -44,7 +45,7 @@ export const connect = Component => {
     const dispatch = action => {
       setState(reducer(state, action))
     }
-    return <Component {...props} dispatch={dispatch} state={state} />
+    return <Component {...props} {...selectedState} dispatch={dispatch} />
   }
 }
 

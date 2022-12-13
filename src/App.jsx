@@ -38,12 +38,14 @@ const Cousin = () => {
   return <section>Cousin</section>
 }
 
-const User = connect(({ state, dispatch }) => {
+const User = connect(state => {
+  return { user: state.user }
+})(({ user }) => {
   console.log('User render!')
-  return <div>UserName:{state.user.name}</div>
+  return <div>UserName:{user.name}</div>
 })
 
-const UserModifier = connect(({ dispatch, state }) => {
+const UserModifier = connect()(({ dispatch, state }) => {
   const onChange = e => {
     dispatch({
       type: 'updateUser',
