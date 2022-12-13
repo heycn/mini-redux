@@ -12,20 +12,30 @@ export const App = () => {
 
   return (
     <appContext.Provider value={contextValue}>
-      <Parent />
-      <Son />
-      <Grandson />
+      <Brother />
+      <Sister />
+      <Cousin />
     </appContext.Provider>
   )
 }
 
-// Parent 用于展示 User 数据
-const Parent = () => <section>Parent<User /></section>
+// Brother 用于展示 User 数据
+const Brother = () => (
+  <section>
+    Brother
+    <User />
+  </section>
+)
 
-// Son 用于修改 User 数据
-const Son = () => <section>Son<Wrapper /></section>
+// Sister 用于修改 User 数据
+const Sister = () => (
+  <section>
+    Sister
+    <UserModifier />
+  </section>
+)
 
-const Grandson = () => <section>Grandson Component</section>
+const Cousin = () => <section>Cousin</section>
 
 const User = () => {
   const contextValue = useContext(appContext)
@@ -46,16 +56,17 @@ const reducer = (state, { type, payload }) => {
   }
 }
 
-
-const Wrapper = () => {
-  const { appState, setAppState } = useContext(appContext)
-  const dispatch = action => {
-    setAppState(reducer(appState, action))
+const connect = Component => {
+  return props => {
+    const { appState, setAppState } = useContext(appContext)
+    const dispatch = action => {
+      setAppState(reducer(appState, action))
+    }
+    return <Component {...props} dispatch={dispatch} state={appState} />
   }
-  return <UserModifier dispatch={dispatch} state={appState} />
 }
 
-const UserModifier = ({dispatch, state}) => {
+const UserModifier = connect(({ dispatch, state, children }) => {
   const onChange = e => {
     dispatch({
       type: 'updateUser',
@@ -64,7 +75,8 @@ const UserModifier = ({dispatch, state}) => {
   }
   return (
     <div>
+      {children}
       <input value={state.user.name} onChange={onChange} />
     </div>
   )
-}
+})
