@@ -23,7 +23,7 @@ export const App = () => {
 const Parent = () => <section>Parent<User /></section>
 
 // Son 用于修改 User 数据
-const Son = () => <section>Son<UserModifier /></section>
+const Son = () => <section>Son<Wrapper /></section>
 
 const Grandson = () => <section>Grandson Component</section>
 
@@ -46,17 +46,25 @@ const reducer = (state, { type, payload }) => {
   }
 }
 
-const UserModifier = () => {
+
+const Wrapper = () => {
   const { appState, setAppState } = useContext(appContext)
+  const dispatch = action => {
+    setAppState(reducer(appState, action))
+  }
+  return <UserModifier dispatch={dispatch} state={appState} />
+}
+
+const UserModifier = ({dispatch, state}) => {
   const onChange = e => {
-    setAppState(reducer(appState, {
+    dispatch({
       type: 'updateUser',
       payload: { name: e.target.value }
-    }))
+    })
   }
   return (
     <div>
-      <input value={appState.user.name} onChange={onChange} />
+      <input value={state.user.name} onChange={onChange} />
     </div>
   )
 }
