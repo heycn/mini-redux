@@ -1,0 +1,15 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  padding: 8px;
+}
+
+section {
+  border: 1px solid #999;
+  padding: 16px;
+  margin: 8px 0;
+}
