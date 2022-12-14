@@ -2,6 +2,7 @@ import React, { useState, useEffect, useContext } from 'react'
 
 let state = void 0
 let reducer = void 0
+let listeners = []
 
 const store = {
   getState() {
@@ -9,14 +10,13 @@ const store = {
   },
   setState(newState) {
     state = newState
-    store.listeners.map(fn => fn(state))
+    listeners.map(fn => fn(state))
   },
-  listeners: [],
   subscribe(fn) {
-    store.listeners.push(fn)
+    listeners.push(fn)
     return () => {
-      const index = store.listeners.indexOf(fn)
-      store.listeners.splice(index, 1)
+      const index = listeners.indexOf(fn)
+      listeners.splice(index, 1)
     }
   }
 }
