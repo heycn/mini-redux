@@ -44,23 +44,23 @@ const changed = (oldState, newState) => {
   return changed
 }
 
-export const connect = (selector, mapDispatchToProps) => Component => {
+export const connect = (mapStateToProps, mapDispatchToProps) => Component => {
   return props => {
     const { state, setState } = useContext(appContext)
     const [_, forceUpdate] = useState({})
     const dispatch = action => {
       setState(reducer(state, action))
     }
-    const selectedState = selector ? selector(state) : { state }
+    const selectedState = mapStateToProps ? mapStateToProps(state) : { state }
     const selectedDispatches = mapDispatchToProps ? mapDispatchToProps(dispatch) : { dispatch }
     useEffect(() => (
       store.subscribe(() => {
-        const newSelectedState = selector ? selector(store.state) : { state: store.state }
+        const newSelectedState = mapStateToProps ? mapStateToProps(store.state) : { state: store.state }
         if (changed(selectedState, newSelectedState)) {
           forceUpdate({})
         }
       })
-    ), [selector])
+    ), [mapStateToProps])
     return <Component {...props} {...selectedState} {...selectedDispatches} />
   }
 }
