@@ -33,20 +33,23 @@ const Sister = () => {
   )
 }
 
-const Cousin = () => {
+const Cousin = connect(state => {
+  return { educational: state.educational }
+})(({ educational }) => {
   console.log('Cousin render!')
   return (
     <section>
       <h1>Cousin</h1>
+      <div>educational: {educational.school}</div>
     </section>
   )
-}
+})
 
 const User = connect(state => {
   return { user: state.user }
 })(({ user }) => {
   console.log('User render!')
-  return <div>UserName:{user.name}</div>
+  return <div>UserName: {user.name}</div>
 })
 
 const UserModifier = connect()(({ dispatch, state }) => {
