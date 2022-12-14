@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { appContext, connect, createStore } from './redux'
+import { connect, createStore, Provider } from './redux'
 import { connectToUser } from './connecters/connectToUser'
 
 const reducer = (state, { type, payload }) => {
@@ -23,11 +23,11 @@ const store = createStore(reducer, initState)
 
 export const App = () => {
   return (
-    <appContext.Provider value={store}>
+    <Provider store={store}>
       <Brother />
       <Sister />
       <Cousin />
-    </appContext.Provider>
+    </Provider>
   )
 }
 

@@ -55,4 +55,12 @@ export const connect = (mapStateToProps, mapDispatchToProps) => Component => {
   }
 }
 
-export const appContext = React.createContext(null)
+const appContext = React.createContext(null)
+
+export const Provider = ({ store, children }) => {
+  return (
+    <appContext.Provider value={store}>
+      {children}
+    </appContext.Provider>
+  )
+}
