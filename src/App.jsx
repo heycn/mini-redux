@@ -27,6 +27,7 @@ export const App = () => {
       <Brother />
       <Sister />
       <Cousin />
+      <AsyncUser />
     </Provider>
   )
 }
@@ -65,6 +66,16 @@ const Cousin = connect(state => {
   )
 })
 
+const AsyncUser = () => {
+  console.log('AsyncUser render!')
+  return (
+    <section>
+      <h1>AsyncUser</h1>
+      <FetchUser />
+    </section>
+  )
+}
+
 const User = connectToUser(({ user }) => {
   console.log('User render!')
   return <div>UserName: {user.name}</div>
@@ -78,6 +89,33 @@ const UserModifier = connectToUser(({ updateUser, user }) => {
   return (
     <div>
       <input value={user.name} onChange={onChange} />
+    </div>
+  )
+})
+
+const ajax = url => {
+  if (url === '/user')
+    return new Promise(resolve => {
+      setTimeout(() => {
+        resolve({ name: '异步的小王', age: 999 })
+      }, 500)
+    })
+}
+const fetchUser = dispatch => {
+  ajax('/user').then(response => {
+    dispatch({ type: 'updateUser', payload: response })
+  })
+}
+
+const FetchUser = connect(null, null)(({state, dispatch}) => {
+  console.log('AsyncUser render!')
+  const onClick = () => {
+    dispatch(fetchUser)
+  }
+  return (
+    <div>
+      <div>UserName: {state.user.name}</div>
+      <button onClick={onClick}>fetchUser</button>
     </div>
   )
 })

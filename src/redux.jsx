@@ -24,7 +24,15 @@ const store = {
   }
 }
 
-const { dispatch }= store
+let { dispatch } = store
+
+const preDispatch = dispatch
+
+dispatch = action => {
+  action instanceof Function
+    ? action(dispatch)
+    : preDispatch(action)
+}
 
 export const createStore = (_reducer, initState) => {
   state = initState
