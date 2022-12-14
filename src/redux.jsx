@@ -3,14 +3,17 @@ import React, { useState, useEffect, useContext } from 'react'
 let state = void 0
 let reducer = void 0
 let listeners = []
+const setState = newState => {
+  state = newState
+  listeners.map(fn => fn(state))
+}
 
 const store = {
   getState() {
     return
   },
-  setState(newState) {
-    state = newState
-    listeners.map(fn => fn(state))
+  dispatch: action => {
+    setState(reducer(state, action))
   },
   subscribe(fn) {
     listeners.push(fn)
@@ -20,6 +23,8 @@ const store = {
     }
   }
 }
+
+const { dispatch }= store
 
 export const createStore = (_reducer, initState) => {
   state = initState
@@ -40,11 +45,7 @@ const changed = (oldState, newState) => {
 
 export const connect = (mapStateToProps, mapDispatchToProps) => Component => {
   return props => {
-    const { setState } = useContext(appContext)
     const [_, forceUpdate] = useState({})
-    const dispatch = action => {
-      setState(reducer(state, action))
-    }
     const selectedState = mapStateToProps ? mapStateToProps(state) : { state }
     const selectedDispatches = mapDispatchToProps ? mapDispatchToProps(dispatch) : { dispatch }
     useEffect(() => (
