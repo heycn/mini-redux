@@ -1,6 +1,25 @@
 import * as React from 'react'
-import { appContext, connect, store } from './redux'
+import { appContext, connect, createStore } from './redux'
 import { connectToUser } from './connecters/connectToUser'
+
+const reducer = (state, { type, payload }) => {
+  if (type === 'updateUser') {
+    return {
+      ...state,
+      user: {
+        ...state.user,
+        ...payload
+      }
+    }
+  } else {
+    return state
+  }
+}
+const initState = {
+  user: { name: 'heycn', age: 22 },
+  educational: { school: 'Tsinghua University' }
+}
+const store = createStore(reducer, initState)
 
 export const App = () => {
   return (
