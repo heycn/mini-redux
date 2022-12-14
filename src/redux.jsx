@@ -1,11 +1,15 @@
 import React, { useState, useEffect, useContext } from 'react'
+let state = void 0
+
 
 const store = {
-  state: void 0,
+  getState() {
+    return
+  },
   reducer: void 0,
   setState(newState) {
-    store.state = newState
-    store.listeners.map(fn => fn(store.state))
+    state = newState
+    store.listeners.map(fn => fn(state))
   },
   listeners: [],
   subscribe(fn) {
@@ -18,7 +22,7 @@ const store = {
 }
 
 export const createStore = (reducer, initState) => {
-  store.state = initState
+  state = initState
   store.reducer = reducer
   return store
 }
@@ -36,7 +40,7 @@ const changed = (oldState, newState) => {
 
 export const connect = (mapStateToProps, mapDispatchToProps) => Component => {
   return props => {
-    const { state, setState } = useContext(appContext)
+    const { setState } = useContext(appContext)
     const [_, forceUpdate] = useState({})
     const dispatch = action => {
       setState(store.reducer(state, action))
@@ -45,7 +49,7 @@ export const connect = (mapStateToProps, mapDispatchToProps) => Component => {
     const selectedDispatches = mapDispatchToProps ? mapDispatchToProps(dispatch) : { dispatch }
     useEffect(() => (
       store.subscribe(() => {
-        const newSelectedState = mapStateToProps ? mapStateToProps(store.state) : { state: store.state }
+        const newSelectedState = mapStateToProps ? mapStateToProps(state) : { state }
         if (changed(selectedState, newSelectedState)) {
           forceUpdate({})
         }
