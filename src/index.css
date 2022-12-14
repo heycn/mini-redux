@@ -5,11 +5,13 @@
 }
 
 body {
-  padding: 8px;
+  padding: 24px;
 }
 
 section {
-  border: 1px solid #999;
+  border: 1px solid #e1e4e8;
+  background-color: #f6f8fa;
+  border-radius: 6px;
   padding: 16px;
-  margin: 8px 0;
+  margin: 16px 0;
 }

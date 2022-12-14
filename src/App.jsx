@@ -16,7 +16,7 @@ const Brother = () => {
   console.log('Brother render!')
   return (
     <section>
-      Brother
+      <h1>Brother</h1>
       <User />
     </section>
   )
@@ -27,7 +27,7 @@ const Sister = () => {
   console.log('Sister render!')
   return (
     <section>
-      Sister
+      <h1>Sister</h1>
       <UserModifier />
     </section>
   )
@@ -35,7 +35,11 @@ const Sister = () => {
 
 const Cousin = () => {
   console.log('Cousin render!')
-  return <section>Cousin</section>
+  return (
+    <section>
+      <h1>Cousin</h1>
+    </section>
+  )
 }
 
 const User = connect(state => {
