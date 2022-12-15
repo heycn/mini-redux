@@ -1,119 +1,194 @@
 import * as React from 'react'
 import { connect, createStore, Provider } from './redux'
 import { connectToUser } from './connecters/connectToUser'
+import {connectToEducational} from './connecters/connectToEducational'
 
 const reducer = (state, { type, payload }) => {
-  if (type === 'updateUser') {
-    return {
+  const updateMap = {
+    updateUser: {
       ...state,
       user: {
         ...state.user,
         ...payload
       }
+    },
+    updateEducational: {
+      ...state,
+      educational: {
+        ...state.educational,
+        ...payload
+      }
     }
-  } else {
-    return state
   }
+
+  return updateMap[type] || state
 }
+
 const initState = {
-  user: { name: 'heycn', age: 22 },
-  educational: { school: 'Tsinghua University' }
+  user: { name: '', age: '' },
+  educational: { school: '', major: '' }
 }
 const store = createStore(reducer, initState)
+
+const empty = string => (string ? string : '--')
 
 export const App = () => {
   return (
     <Provider store={store}>
-      <Brother />
-      <Sister />
-      <Cousin />
-      <AsyncUser />
-      <PromiseUser />
+      <ReadData />
+      <div className='flex'>
+        <WriteUser />
+        <WriteEducational />
+      </div>
+      <div className='flex'>
+        <AsyncAction />
+        <PromiseAction />
+      </div>
     </Provider>
   )
 }
 
-// Brother 用于展示 User 数据
-const Brother = () => {
+const ReadData = () => {
   return (
     <section>
-      <h1>Brother</h1>
+      <h2>读取数据</h2>
+      <br />
+      <AllData />
+      <br />
+      <h3>用户信息</h3>
       <User />
+      <br />
+      <h3>教育信息</h3>
+      <Educational />
     </section>
   )
 }
 
-// Sister 用于修改 User 数据
-const Sister = () => {
+const AllData = connect()(({state}) => {
+  return (
+    <>
+      <h3>Store</h3>
+      <div>{JSON.stringify(state)}</div>
+    </>
+  )
+})
+
+const WriteUser = () => {
   return (
     <section>
-      <h1>Sister</h1>
+      <h2>修改用户信息</h2>
+      <br />
       <UserModifier />
     </section>
   )
 }
 
-const Cousin = connect(state => {
-  return { educational: state.educational }
-})(({ educational }) => {
+const WriteEducational = () => {
   return (
     <section>
-      <h1>Cousin</h1>
-      <div>educational: {educational.school}</div>
-    </section>
-  )
-})
-
-const AsyncUser = () => {
-  return (
-    <section>
-      <h1>AsyncUser</h1>
-      <FetchUser />
-    </section>
-  )
-}
-
-const PromiseUser = () => {
-  return (
-    <section>
-      <h1>PromiseUser</h1>
-      <FetchPromiseUser />
+      <h2>修改教育信息</h2>
+      <br />
+      <EducationalModifier />
     </section>
   )
 }
 
 const User = connectToUser(({ user }) => {
-  return <div>UserName: {user.name}</div>
+  return (
+    <>
+      <div>姓名: {empty(user.name)}</div>
+      <div>年龄: {empty(user.age)}</div>
+    </>
+  )
 })
 
+const Educational = connectToEducational(({ educational }) => {
+  return (
+    <>
+      <div>学校: {empty(educational.school)}</div>
+      <div>专业: {empty(educational.major)}</div>
+    </>
+  )
+})
+
+const AsyncAction = () => {
+  return (
+    <section>
+      <h2>支持异步的 Action</h2>
+      <br />
+      <FetchUser />
+    </section>
+  )
+}
+
+const PromiseAction = () => {
+  return (
+    <section>
+      <h2>支持 Promise 的 Action</h2>
+      <br />
+      <FetchPromiseUser />
+    </section>
+  )
+}
+
 const UserModifier = connectToUser(({ updateUser, user }) => {
-  const onChange = e => {
+  const changName = e => {
     updateUser({ name: e.target.value })
   }
-  console.log('UserModifier render!')
+  const changAge = e => {
+    updateUser({ age: e.target.value })
+  }
   return (
-    <div>
-      <input value={user.name} onChange={onChange} />
-    </div>
+    <>
+      <div>
+        修改姓名
+        <input maxLength={4} value={user.name} onChange={changName} />
+      </div>
+      <br />
+      <div>
+        修改年龄
+        <input maxLength={3} value={user.age} onChange={changAge} />
+      </div>
+    </>
+  )
+})
+
+const EducationalModifier = connectToEducational(({ updateEducational, educational }) => {
+  const changSchool = e => {
+    updateEducational({ school: e.target.value })
+  }
+  const changMajor = e => {
+    updateEducational({ major: e.target.value })
+  }
+  return (
+    <>
+      <div>
+        修改学校
+        <input maxLength={5} value={educational.name} onChange={changSchool} />
+      </div>
+      <br />
+      <div>
+        修改专业
+        <input maxLength={5} value={educational.age} onChange={changMajor} />
+      </div>
+    </>
   )
 })
 
 const ajax = url => {
-  if (url === '/user')
-    return new Promise(resolve => {
-      setTimeout(() => {
-        resolve({ data: { name: '异步的小王', age: 99 } })
-      }, 500)
-    })
-  if (url === '/promiseUser')
-    return new Promise(resolve => {
-      setTimeout(() => {
-        resolve({ data: { name: 'Promise的小王', age: 99 } })
-      }, 500)
-    })
+  const urlMap = {
+    '/user': { name: '异步的小王', age: '异步的18岁' },
+    '/promiseEducational': { school: 'Promise的学校', major: 'Promise的专业' },
+  }
+  return new Promise(resolve => {
+    setTimeout(() => {
+      resolve({ data: urlMap[url] })
+    }, 500)
+  })
 }
 
-const FetchUser = connect(null, null)(({state, dispatch}) => {
+const FetchUser = connect()(({state, dispatch}) => {
+  console.log(state)
   const fetchUser = dispatch => {
     ajax('/user').then(response => {
       dispatch({ type: 'updateUser', payload: response.data })
@@ -122,31 +197,21 @@ const FetchUser = connect(null, null)(({state, dispatch}) => {
   const onClick = () => {
     dispatch(fetchUser)
   }
-  return (
-    <div>
-      <div>UserName: {state.user.name}</div>
-      <button onClick={onClick}>fetchUser</button>
-    </div>
-  )
+  return <button onClick={onClick}>0.5后修改用户信息</button>
 })
 
 const FetchPromiseUser = connect(null, null)(({state, dispatch}) => {
   const fetchUserPromise = async () => {
-    const response = await ajax('/promiseUser')
+    const response = await ajax('/promiseEducational')
     return response.data
   }
   const fetchUserPromiseFunc = async dispatch => {
-    const response = await ajax('/promiseUser')
-    return dispatch({ type: 'updateUser', payload: response.data })
+    const response = await ajax('/promiseEducational')
+    return dispatch({ type: 'updateEducational', payload: response.data })
   }
   const onClick = () => {
-    dispatch({ type: 'updateUser', payload: fetchUserPromise() })
+    dispatch({ type: 'updateEducational', payload: fetchUserPromise() })
     // dispatch(fetchUserPromiseFunc)
   }
-  return (
-    <div>
-      <div>UserName: {state.user.name}</div>
-      <button onClick={onClick}>fetchUser</button>
-    </div>
-  )
+  return <button onClick={onClick}>0.5秒后修改教育信息</button>
 })
