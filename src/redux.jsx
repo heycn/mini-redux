@@ -26,12 +26,22 @@ const store = {
 
 let { dispatch } = store
 
-const preDispatch = dispatch
+const prevDispatch = dispatch
 
 dispatch = action => {
   action instanceof Function
     ? action(dispatch)
-    : preDispatch(action)
+    : prevDispatch(action)
+}
+
+const asyncDispatch = dispatch
+
+dispatch = action => {
+  action.payload instanceof Promise
+    ? action.payload.then(data => {
+        dispatch({ ...action, payload: data })
+      })
+    : asyncDispatch(action)
 }
 
 export const createStore = (_reducer, initState) => {

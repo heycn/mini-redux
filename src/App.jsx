@@ -28,13 +28,13 @@ export const App = () => {
       <Sister />
       <Cousin />
       <AsyncUser />
+      <PromiseUser />
     </Provider>
   )
 }
 
 // Brother 用于展示 User 数据
 const Brother = () => {
-  console.log('Brother render!')
   return (
     <section>
       <h1>Brother</h1>
@@ -45,7 +45,6 @@ const Brother = () => {
 
 // Sister 用于修改 User 数据
 const Sister = () => {
-  console.log('Sister render!')
   return (
     <section>
       <h1>Sister</h1>
@@ -57,7 +56,6 @@ const Sister = () => {
 const Cousin = connect(state => {
   return { educational: state.educational }
 })(({ educational }) => {
-  console.log('Cousin render!')
   return (
     <section>
       <h1>Cousin</h1>
@@ -67,7 +65,6 @@ const Cousin = connect(state => {
 })
 
 const AsyncUser = () => {
-  console.log('AsyncUser render!')
   return (
     <section>
       <h1>AsyncUser</h1>
@@ -76,8 +73,16 @@ const AsyncUser = () => {
   )
 }
 
+const PromiseUser = () => {
+  return (
+    <section>
+      <h1>PromiseUser</h1>
+      <FetchPromiseUser />
+    </section>
+  )
+}
+
 const User = connectToUser(({ user }) => {
-  console.log('User render!')
   return <div>UserName: {user.name}</div>
 })
 
@@ -97,20 +102,46 @@ const ajax = url => {
   if (url === '/user')
     return new Promise(resolve => {
       setTimeout(() => {
-        resolve({ name: '异步的小王', age: 999 })
+        resolve({ data: { name: '异步的小王', age: 99 } })
+      }, 500)
+    })
+  if (url === '/promiseUser')
+    return new Promise(resolve => {
+      setTimeout(() => {
+        resolve({ data: { name: 'Promise的小王', age: 99 } })
       }, 500)
     })
 }
-const fetchUser = dispatch => {
-  ajax('/user').then(response => {
-    dispatch({ type: 'updateUser', payload: response })
-  })
-}
 
 const FetchUser = connect(null, null)(({state, dispatch}) => {
-  console.log('AsyncUser render!')
+  const fetchUser = dispatch => {
+    ajax('/user').then(response => {
+      dispatch({ type: 'updateUser', payload: response.data })
+    })
+  }
   const onClick = () => {
     dispatch(fetchUser)
+  }
+  return (
+    <div>
+      <div>UserName: {state.user.name}</div>
+      <button onClick={onClick}>fetchUser</button>
+    </div>
+  )
+})
+
+const FetchPromiseUser = connect(null, null)(({state, dispatch}) => {
+  const fetchUserPromise = async () => {
+    const response = await ajax('/promiseUser')
+    return response.data
+  }
+  const fetchUserPromiseFunc = async dispatch => {
+    const response = await ajax('/promiseUser')
+    return dispatch({ type: 'updateUser', payload: response.data })
+  }
+  const onClick = () => {
+    dispatch({ type: 'updateUser', payload: fetchUserPromise() })
+    // dispatch(fetchUserPromiseFunc)
   }
   return (
     <div>
